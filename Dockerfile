@@ -1,10 +1,14 @@
-FROM golang:alpine
+FROM golang AS builder
 
-WORKDIR /go/src/app
+WORKDIR /go/app
 
-COPY . .
+COPY app.go .
 
-RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go mod init djgoulart/hello
+RUN go build -ldflags "-s -w" app.go
 
-CMD [ "app" ]
+FROM scratch
+
+COPY --from=builder /go/app/app /go/app
+
+CMD [ "/go/app" ]
